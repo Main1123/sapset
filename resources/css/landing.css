@@ -1,0 +1,33 @@
+/* Estilos específicos para el landing page */
+
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.sapset-title {
+    font-size: 5rem;
+    font-weight: 800;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+}
+
+.sapset-subtitle {
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* Ajustes responsivos */
+@media (max-width: 768px) {
+    .sapset-title {
+        font-size: 3.5rem;
+    }
+    
+    .sapset-subtitle {
+        font-size: 1.5rem;
+    }
+}

@@ -1,0 +1,39 @@
+@import url('../css/fonts.css');
+
+:root {
+    --font-family: 'Poppins', sans-serif;
+}
+
+body {
+    font-family: var(--font-family);
+}
+
+/* Aseguramos que todos los elementos de texto usen la fuente correcta */
+h1, h2, h3, h4, h5, h6, p, span, div {
+    font-family: var(--font-family);
+}
+
+/* Estilos específicos para diferentes pesos de la fuente */
+.font-light {
+    font-weight: 300;
+}
+
+.font-regular {
+    font-weight: 400;
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.font-extrabold {
+    font-weight: 800;
+}
