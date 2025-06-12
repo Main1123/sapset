@@ -20,7 +20,7 @@
         </ul>
     </nav>
     <div class="header-right">
-        <img src="{{ asset('images/sapset-logo.png') }}" alt="Logo SAPSET" class="sapset-logo">
+        <img src="{{ asset('img/logosapset.png') }}" alt="Logo SAPSET" class="sapset-logo">
     </div>
 </header>
 
@@ -289,7 +289,8 @@
         font-size: 2.5em;
         color: #120587;
         margin-bottom: 20px;
-        text-align: center;
+        text-align: start;
+        font-weight: bold;
     }
 
     .about-us-text p {
@@ -360,6 +361,7 @@
         font-weight: bold;
         cursor: pointer;
         transition: background-color 0.3s ease, color 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
     .btn-more-services:hover {
@@ -456,6 +458,7 @@
         cursor: pointer;
         transition: background-color 0.3s ease, color 0.3s ease;
         min-width: 250px; /* Ancho mínimo para los botones */
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
 
     .btn-contact:hover {
