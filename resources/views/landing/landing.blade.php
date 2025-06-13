@@ -17,6 +17,7 @@
             <li><a href="#">Catálogo</a></li>
             <li><a href="#">Servicios</a></li>
             <li><a href="#">Contáctanos</a></li>
+            <li><a href="{{ route('login') }}">Login</a></li>
         </ul>
     </nav>
     <div class="header-right">
@@ -109,6 +110,7 @@
                 <li><a href="#">Catálogo</a></li>
                 <li><a href="#">Servicios</a></li>
                 <li><a href="#">Contáctanos</a></li>
+                <li><a href="{{ route('login') }}">Login</a></li>
             </ul>
         </nav>
         <div class="social-icons">

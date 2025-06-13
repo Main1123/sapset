@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') - Sistema SAPSET</title>
-
+    <title>@yield('title', 'Admin') - Sistema SAPSET</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    
+
     <style>
         :root {
             --primary-color: #120587;
@@ -121,13 +120,16 @@
             color: var(--primary-color);
             font-size: 1.8em;
         }
-        
-        /* Opcional: Elimina o modifica las reglas @media si no necesitas un comportamiento responsivo específico para el sidebar */
-        /* @media (max-width: 768px) { ... } */
+
+        /* Opcional: Si quieres un comportamiento responsivo para el sidebar en móviles,
+            tendrías que añadir media queries aquí para, por ejemplo, ocultarlo y
+            mostrarlo con un botón en la navbar (requiere JS adicional).
+            Por ahora, solo se encogerá/apilará como un elemento flex normal. */
     </style>
 </head>
 <body>
-    <div id="wrapper"> <div class="sidebar">
+    <div id="wrapper">
+        <div class="sidebar">
             <div class="sidebar-header text-center py-4">
                 <h3 class="text-white mb-0">SAPSET</h3>
                 <p class="text-white-50 mb-0">Panel de Administración</p>
@@ -149,24 +151,34 @@
         </div>
 
         <div class="main-content">
-            <nav class="navbar navbar-expand-lg">
+            <nav class="navbar navbar-expand-lg navbar-dark">
                 <div class="container-fluid">
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbarCollapse" aria-controls="mainNavbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
                     <a class="navbar-brand" href="{{ route('admin.home') }}">
-                        <i class="fas fa-home me-2"></i> Dashboard </a>
-                    <div class="navbar-nav ms-auto">
-                        <a class="nav-link" href="{{ route('logout') }}"
-                           onclick="event.preventDefault();
-                                         document.getElementById('logout-form').submit();">
-                            <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
-                        </a>
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                            @csrf
-                        </form>
+                        Panel de Administración SAPSET
+                    </a>
+
+                    <div class="collapse navbar-collapse" id="mainNavbarCollapse">
+                        <ul class="navbar-nav ms-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('logout') }}"
+                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Cerrar Sesión
+                                </a>
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                    @csrf
+                                </form>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </nav>
 
-            <div class="page-content-wrapper"> <div class="content-header">
+            <div class="page-content-wrapper">
+                <div class="content-header">
                     <h1>@yield('header')</h1>
                 </div>
 
@@ -175,8 +187,15 @@
                 </main>
             </div>
         </div>
-    </div>
+    </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<style>
+    h3{
+        font-family: 'Roboto', sans-serif;
+        font-size: 24px;
+        font-weight: bold;
+        color: #333;
+    }
+</style>
 </body>
 </html>
