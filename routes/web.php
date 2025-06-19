@@ -13,12 +13,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('landing.landing');
-});
+Route::get('/', [App\Http\Controllers\LandingController::class, 'index'])->name('landing');
 
-Auth::routes();
+Auth::routes(['register' => false]);
 
+// Ruta pública para landing
 Route::view('/landing', 'landing.landing')->name('landing');
 
 // Rutas protegidas por autenticación
@@ -26,7 +25,7 @@ Route::middleware(['auth'])->group(function () {
     // Rutas de administración
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::view('/', 'admin.home')->name('home');
-        Route::resource('imagenes', App\Http\Controllers\imagenesController::class);
+        Route::resource('imagenes', App\Http\Controllers\ImagenesController::class);
 
         Route::resource('servicios', App\Http\Controllers\serviciosController::class);
         Route::resource('pedidos', App\Http\Controllers\pedidosController::class);
