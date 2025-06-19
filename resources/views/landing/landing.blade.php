@@ -39,8 +39,8 @@
 <section class="about-us">
     <div class="row container about-us-container"> {{-- Clase modificada para evitar conflicto --}}
         <div class="img col-md-6 about-us-img">
-            <img src="{{ asset('img/img1.png') }}" alt="Imagen descriptiva 1" class="img-fluid">
-            <img src="{{ asset('img/img2.png') }}" alt="Imagen descriptiva 2" class="img-fluid">
+            <img src="{{ asset('img/sapset.jpeg') }}" alt="Imagen descriptiva 1" class="img-fluid">
+            {{-- <img src="{{ asset('img/sapset.jpeg') }}" alt="Imagen descriptiva 2" class="img-fluid"> --}}
         </div>
         <div class="col-md-6 about-us-text">
             <div class="text-content">

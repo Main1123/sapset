@@ -6,16 +6,17 @@
     <title>@yield('title', 'Admin') - Sistema SAPSET</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css">
 
     <style>
         :root {
             --primary-color: #120587;
             --secondary-color: #3498db;
             --background-color: #f8f9fa;
-            --sidebar-width: 250px; /* Ancho del sidebar */
+            --sidebar-width: 250px;
         }
 
-        /* Asegura que el HTML y el Body ocupen toda la altura */
         html, body {
             height: 100%;
             margin: 0;
@@ -24,35 +25,33 @@
             background-color: var(--background-color);
         }
 
-        /* Contenedor principal: usa Flexbox para organizar sidebar y contenido */
         #wrapper {
-            display: flex; /* Habilita el modo flex */
-            min-height: 100vh; /* Ocupa toda la altura de la ventana */
-            overflow: hidden; /* Evita scrolls inesperados en el cuerpo principal */
+            display: flex;
+            min-height: 100vh;
+            overflow: hidden;
         }
 
-        /* Sidebar: Fijo a la izquierda */
         .sidebar {
             background-color: var(--primary-color);
             color: white;
-            width: var(--sidebar-width); /* Ancho fijo */
-            flex-shrink: 0; /* No permite que el sidebar se encoja */
+            width: var(--sidebar-width);
+            flex-shrink: 0;
             padding: 20px 0;
-            overflow-y: auto; /* Permite scroll solo si el contenido del sidebar es muy largo */
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1); /* Sombra sutil */
+            overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
         }
 
         .sidebar-header {
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
             margin-bottom: 20px;
-            padding-bottom: 15px; /* Ajuste para el padding vertical */
+            padding-bottom: 15px;
         }
 
         .sidebar a {
             color: white;
             text-decoration: none;
             padding: 12px 20px;
-            display: flex; /* Para alinear ícono y texto */
+            display: flex;
             align-items: center;
             transition: background-color 0.3s ease;
         }
@@ -70,21 +69,19 @@
             font-weight: bold;
         }
 
-        /* Contenido principal: Ocupa el espacio restante a la derecha */
         .main-content {
-            flex-grow: 1; /* Hace que ocupe todo el espacio sobrante */
-            display: flex; /* Usa flex para la navbar y el contenido */
-            flex-direction: column; /* Apila la navbar y el contenido */
-            overflow-y: auto; /* Permite scroll solo si el contenido principal es muy largo */
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
             background-color: var(--background-color);
         }
 
-        /* Navbar dentro del contenido principal */
         .navbar {
             background-color: var(--secondary-color);
             padding: 15px 20px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            flex-shrink: 0; /* No permite que la navbar se encoja */
+            flex-shrink: 0;
         }
 
         .navbar-brand {
@@ -102,10 +99,9 @@
             color: #f0f0f0 !important;
         }
 
-        /* Wrapper para el padding del contenido de la página */
         .page-content-wrapper {
             padding: 20px;
-            flex-grow: 1; /* Permite que esta área crezca para llenar el espacio */
+            flex-grow: 1;
         }
 
         .content-header {
@@ -121,10 +117,12 @@
             font-size: 1.8em;
         }
 
-        /* Opcional: Si quieres un comportamiento responsivo para el sidebar en móviles,
-            tendrías que añadir media queries aquí para, por ejemplo, ocultarlo y
-            mostrarlo con un botón en la navbar (requiere JS adicional).
-            Por ahora, solo se encogerá/apilará como un elemento flex normal. */
+        h3{
+            font-family: 'Roboto', sans-serif;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
     </style>
 </head>
 <body>
@@ -187,15 +185,15 @@
                 </main>
             </div>
         </div>
-    </div> <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
 
-<style>
-    h3{
-        font-family: 'Roboto', sans-serif;
-        font-size: 24px;
-        font-weight: bold;
-        color: #333;
-    }
-</style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+
+    @stack('scripts')
+
 </body>
 </html>

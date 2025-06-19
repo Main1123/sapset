@@ -20,6 +20,7 @@ class serviciosController extends Controller
             'titulo' => $request->titulo,
             'descripcion' => $request->descripcion,
             'imagen_id' => $request->imagen_id,
+            'precio' => $request->precio,
             'active' => $request->active
         ]);
         return response()->json([
