@@ -123,10 +123,10 @@ $(document).ready(function() {
 
     $('#btnAbrirModalNuevaImagen').on('click', function() {
         $('#formImagen').trigger('reset');
-        $('#imagen_id').val('');
+        $('#imagen_id').val(''); // Limpia el ID oculto al abrir para una nueva imagen
         $('#modalNuevaImagenLabel').text('Nueva Imagen');
         $('#btnGuardarImagen').text('Guardar');
-        $('#current_image_preview').html('');
+        $('#current_image_preview').html(''); // Limpia la vista previa de la imagen
         $('#modalNuevaImagen').modal('show');
     });
 
@@ -143,18 +143,16 @@ $(document).ready(function() {
 
             $('#modalNuevaImagenLabel').text('Editar Imagen');
             $('#btnGuardarImagen').text('Actualizar');
-            $('#id').val(imagenData.id);
+            $('#imagen_id').val(imagenData.id); // <-- ¡CORRECTO! Asigna el ID al input oculto
             $('#filename').val(imagenData.filename);
             $('#section').val(imagenData.section);
-
-            // Se elimina la línea que causaba el error: $('#path').val(data.imagen.path);
 
             if (imagenData.path) {
                 $('#current_image_preview').html(`<img src="/storage/${imagenData.path}" alt="Imagen actual" width="100">`);
             } else {
                 $('#current_image_preview').html('');
             }
-            $('#path').val(''); 
+            $('#path').val(''); // Limpiar el input de archivo para que no se envíe un archivo "falso"
 
             $('#modalNuevaImagen').modal('show');
 
@@ -169,33 +167,49 @@ $(document).ready(function() {
     $(document).on('submit', '#formImagen', function(e){
         e.preventDefault();
         let form = new FormData(this);
-        let imagenId = $('#imagen_id').val();
+        let imagenId = $('#imagen_id').val(); // <-- ¡CORREGIDO! Ahora usa el ID correcto del input oculto
 
         let url = '/api/imagenes';
         let method = 'POST';
-
+        
         if (imagenId) {
             url = '/api/imagenes/' + imagenId;
-            method = 'POST';
-            form.append('_method', 'PUT'); 
+            method = 'POST'; // Cambiado a POST porque FormData con _method=PUT/PATCH funciona mejor con POST en algunos servidores/configuraciones de Laravel para envío de archivos. Laravel interpretará el _method.
+            form.append('_method', 'PUT'); // Esto es crucial para que Laravel reconozca la petición como PUT/PATCH
         }
 
+        // Importante: Eliminar el encabezado Content-Type cuando se usa FormData para que el navegador lo establezca correctamente con el boundary.
+        // También añadimos el CSRF token, aunque FormData ya debería incluirlo si el campo CSRF está en el formulario.
         fetch(url, {
             method: method,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') 
+            },
             body: form,
         })
         .then(response => {
             if (!response.ok) {
-                return response.json().then(err => { throw err; });
+                console.log('Respuesta del servidor (fallo):', response);
+                console.log('Status (fallo):', response.status);
+                console.log('Status text (fallo):', response.statusText);
+                return response.text().then(text => {
+                    console.log('Respuesta completa (fallo):', text);
+                    try {
+                        const error = JSON.parse(text);
+                        throw error;
+                    } catch (e) {
+                        throw { message: text };
+                    }
+                });
             }
             return response.json();
         })
         .then(res => {
-            Swal.fire(res.msj || 'Operación exitosa', '', 'success');
+            Swal.fire(res.message || 'Operación exitosa', '', 'success');
             $('#formImagen').trigger('reset');
             $('#modalNuevaImagen').modal('hide');
             $('#current_image_preview').html('');
-            getImagenes();
+            getImagenes(); // Recargar la tabla después de guardar/actualizar
         })
         .catch(error => {
             console.error('Hubo un problema al guardar/actualizar la imagen:', error);
@@ -226,7 +240,7 @@ $(document).ready(function() {
                 fetch('/api/imagenes/' + id, {
                     method: 'DELETE',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json', // Esto es correcto para DELETE con JSON
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') 
                     },
                     body: JSON.stringify({ id: id }) 
@@ -239,7 +253,7 @@ $(document).ready(function() {
                 })
                 .then(res => {
                     Swal.fire(res.msj || 'Eliminación exitosa', '', 'success');
-                    getImagenes();
+                    getImagenes(); // Recargar la tabla después de eliminar
                 })
                 .catch(error => {
                     console.error('Hubo un problema con la petición fetch:', error);
@@ -271,7 +285,7 @@ $(document).ready(function() {
     $('#modalNuevaImagen').on('hidden.bs.modal', function () {
         $('#formImagen').trigger('reset');
         $('#current_image_preview').html('');
-        $('#imagen_id').val('');
+        $('#imagen_id').val(''); // Asegurarse de limpiar el ID oculto al cerrar el modal
         $('#modalNuevaImagenLabel').text('Nueva Imagen');
         $('#btnGuardarImagen').text('Guardar');
     });

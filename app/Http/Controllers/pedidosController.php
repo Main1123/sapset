@@ -11,24 +11,25 @@ class pedidosController extends Controller
         $pedido = Pedido::all();
         return response()->json([
             'pedido' => $pedido,
-            'message' => 'Servicios obtenidos correctamente'
+            'message' => 'Pedidos obtenidos correctamente'
         ]);
     }
 
     public function store(Request $request){
         $pedido = Pedido::create([
-            'titulo' => $request->nombre_cliente,
-            'descripcion' => $request->email,
-            'imagen_id' => $request->telefono,
-            'precio' => $request->direccion,
-            'active' => $request->servicio,
+            'nombre_cliente' => $request->nombre_cliente,
+            'cedula' => $request->cedula,
+            'email' => $request->email,
+            'telefono' => $request->telefono,
+            'direccion' => $request->direccion,
+            'servicio_id' => $request->servicio_id,
             'monto' => $request->monto,
             'estado' => $request->estado,
             'observaciones' => $request->observaciones
         ]);
         return response()->json([
             'pedido' => $pedido,
-            'message' => 'Servicio guardado correctamente'
+            'message' => 'Pedido guardado correctamente'
         ]);
     }
 
@@ -36,7 +37,7 @@ class pedidosController extends Controller
         $pedido = Pedido::find($id);
         return response()->json([
             'pedido' => $pedido,
-            'message' => 'Servicio obtenido correctamente'
+            'message' => 'Pedido obtenido correctamente'
         ]);
     }
 
@@ -45,7 +46,7 @@ class pedidosController extends Controller
         $pedido->update($request->all());
         return response()->json([
             'pedido' => $pedido,
-            'message' => 'Servicio actualizado correctamente'
+            'message' => 'Pedido actualizado correctamente'
         ]);
     }   
 
@@ -54,7 +55,7 @@ class pedidosController extends Controller
         $pedido->delete();
         return response()->json([
             'pedido' => $pedido,
-            'message' => 'Servicio eliminado correctamente'
+            'message' => 'Pedido eliminado correctamente'
         ]);
     }
 }

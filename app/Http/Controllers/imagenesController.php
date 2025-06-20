@@ -62,9 +62,9 @@ class ImagenesController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $imagen_id)
     {
-        $imagen = Imagene::find($id);
+        $imagen = Imagene::find($imagen_id);
         if (!$imagen) {
             return response()->json(['message' => 'Imagen no encontrada para actualizar'], 404);
         }
@@ -81,7 +81,7 @@ class ImagenesController extends Controller
             }
 
             try {
-                $imagePath = $request->file('path')->store('img', 'public'); // Corregido a 'img'
+                $imagePath = $request->file('path')->store('img', 'public');
                 $imagen->path = $imagePath;
             } catch (\Exception $e) {
                 Log::error('Error al actualizar la imagen en el storage: ' . $e->getMessage());

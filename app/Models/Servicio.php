@@ -37,7 +37,8 @@ class Servicio extends Model
 		'titulo',
 		'descripcion',
 		'imagen_id',
-		'active'
+		'active',
+		'precio'
 	];
 
 	public function imagene()

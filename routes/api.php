@@ -2,8 +2,9 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\imagenesController;
-use App\Http\Controllers\serviciosController;
+use App\Http\Controllers\ImagenesController; // Asegúrate de que el nombre del controlador use PascalCase
+use App\Http\Controllers\ServiciosController; // Asegúrate de que el nombre del controlador use PascalCase
+use App\Http\Controllers\PedidosController; // Si tienes un controlador de Pedidos en API, inclúyelo aquí también
 
 /*
 |--------------------------------------------------------------------------
@@ -16,24 +17,18 @@ use App\Http\Controllers\serviciosController;
 |
 */
 
-// Ruta protegida que requiere autenticación
+// Ruta protegida que requiere autenticación (ejemplo con Sanctum)
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-// Ruta pública para las imágenes
-Route::apiResource('/imagenes', imagenesController::class);
-Route::get('/imagenes', [imagenesController::class, 'index']);
-Route::get('/imagenes/{id}', [imagenesController::class, 'show']);
-Route::post('/imagenes', [imagenesController::class, 'store']);
-Route::put('/imagenes/{id}', [imagenesController::class, 'update']);
-Route::delete('/imagenes/{id}', [imagenesController::class, 'destroy']);
+    Route::apiResource('imagenes', ImagenesController::class); // Sin prefijo / porque apiResource ya lo asume
+    // Route::apiResource('servicios', serviciosController::class);
+   // Rutas personalizadas para servicios
+Route::post('servicios', [ServiciosController::class, 'store']);
+Route::get('servicios', [ServiciosController::class, 'index']);
+Route::get('servicios/{id}', [ServiciosController::class, 'show']);
+Route::put('servicios/{id}', [ServiciosController::class, 'update']);
+Route::delete('servicios/{id}', [ServiciosController::class, 'destroy']);
 
-Route::apiResource('/servicios', serviciosController::class);
-Route::get('/servicios', [serviciosController::class, 'index']);
-Route::get('/servicios/{id}', [serviciosController::class, 'show']);
-Route::post('/servicios', [serviciosController::class, 'store']);
-Route::put('/servicios/{id}', [serviciosController::class, 'update']);
-Route::delete('/servicios/{id}', [serviciosController::class, 'destroy']);
-
-
+    Route::apiResource('pedidos', PedidosController::class);

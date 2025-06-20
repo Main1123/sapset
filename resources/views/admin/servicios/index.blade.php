@@ -56,7 +56,7 @@
         <div class="card-header">
             <h3 class="card-title">Lista de Servicios</h3>
             <div class="card-tools">
-                <button data-bs-toggle="modal" data-bs-target="#modalNuevoServicio" class="btn btn-primary btn-sm">
+                <button data-bs-toggle="modal" data-bs-target="#modalNuevoServicio" class="btn btn-primary btn-sm" id="btnAbrirModalNuevoServicio">
                     <i class="fas fa-plus"></i> Nuevo Servicio
                 </button>
             </div>
@@ -70,6 +70,7 @@
                         <th>Descripción</th>
                         <th>Precio</th>
                         <th>Estado</th>
+                        <th>Imagen</th> 
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -84,54 +85,68 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-    $('#serviciosTable').DataTable({
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json'
-        },
-        responsive: true,
-        autoWidth: false,
-        pageLength: 10,
-        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Todos']],
-        order: [[0, 'asc']]
-    });
+    let dataTableInstance; 
 
-    get();
-
-    function get(){
-        fetch('/api/servicios')
-        .then(response => response.json())
-        .then(data => {
-            let tbody = document.querySelector('#serviciosTable tbody');
-            tbody.innerHTML = '';
-            // Asegúrate de que 'data.service' es el array correcto de servicios
-            data.service.forEach(service => { 
-                let tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${service.id}</td>
-                    <td>${service.titulo}</td>
-                    <td>${service.descripcion}</td>
-                    <td>${service.precio}</td>
-                    <td>${service.estado}</td>
-                    <td>
-                        <button class="btn btn-primary btn-sm" onclick="edit(${service.id})"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteService(${service.id})"><i class="fas fa-trash"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
+    function initializeDataTable() {
+        if ($.fn.DataTable.isDataTable('#serviciosTable')) {
+            $('#serviciosTable').DataTable().destroy();
+        }
+        dataTableInstance = $('#serviciosTable').DataTable({
+            language: {
+                url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json'
+            },
+            responsive: true,
+            autoWidth: false,
+            pageLength: 10,
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Todos']],
+            order: [[0, 'asc']]
         });
     }
 
-    $('.card-tools button').on('click', function() {
+    initializeDataTable();
+    getServicios(); // Renamed to getServicios for clarity
+
+    function getServicios(){ // Renamed to getServicios for clarity
+        fetch('/api/servicios')
+        .then(response => response.json())
+        .then(data => {
+            dataTableInstance.clear(); 
+            const servicios = data.services || data; // Assuming `data.service` or just `data` contains the array
+
+            servicios.forEach(services => { 
+                const imageUrl = services.imagen ? `/storage/${services.imagen}` : 'https://via.placeholder.com/50'; 
+                dataTableInstance.row.add([
+                    services.id,
+                    services.titulo,
+                    services.descripcion,
+                    services.precio,
+                    services.estado == 1 ? 'Activo' : 'Inactivo', // Display "Activo" or "Inactivo"
+                    `<img src="${imageUrl}" class="img-thumbnail" width="50" height="50"/>`,
+                    `
+                    <button class="btn btn-primary btn-sm" onclick="editServicio(${services.id})"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteServicio(${services.id})"><i class="fas fa-trash"></i></button>
+                    `
+                ]).draw(false);
+            });
+            dataTableInstance.draw(); 
+        })
+        .catch(error => {
+            console.error('Error al cargar los servicios:', error);
+            Swal.fire("Error", "No se pudieron cargar los servicios.", "error");
+        });
+    }
+
+    $('#btnAbrirModalNuevoServicio').on('click', function() {
         $('#formServicio').trigger('reset');
-        $('#service_id').val('');
+        $('#service_id').val(''); 
         $('#modalServicioLabel').text('Nuevo Servicio');
         $('#btnGuardarServicio').text('Guardar');
-        $('#current_image_preview').html('');
+        $('#current_image_preview').html(''); 
+        $('#estado').val('1'); // Set default to activo for new service
         $('#modalNuevoServicio').modal('show');
     });
 
-    window.edit = function(id) {
+    window.editServicio = function(id) { // Renamed for consistency
         fetch('/api/servicios/' + id)
         .then(response => {
             if (!response.ok) {
@@ -140,29 +155,26 @@ $(document).ready(function() {
             return response.json();
         })
         .then(data => {
-            // Revisa la consola para asegurar que data.estado o data.active viene correctamente
-            // Si tu API devuelve 'active' en lugar de 'estado', cambia `data.estado` por `data.active` aquí
-            $('#modalServicioLabel').text('Editar Servicio');
-            $('#btnGuardarServar').text('Actualizar');
-            $('#service_id').val(data.service.id);
-            $('#titulo').val(data.service.titulo);
-            $('#descripcion').val(data.service.descripcion);
-            $('#precio').val(data.service.precio);
-            $('#imagen').val(data.service.imagen);
-            $('#activo').val(data.service.activo);
+            const servicioData = data.service || data; 
 
-            if (data.service.imagen) {
-                $('#current_image_preview').html(`<img src="/storage/${data.service.imagen}" alt="Imagen actual" width="100">`);
+            $('#modalServicioLabel').text('Editar Servicio');
+            $('#btnGuardarServicio').text('Actualizar'); // Corrected typo
+            $('#service_id').val(servicioData.id);
+            $('#titulo').val(servicioData.titulo);
+            $('#descripcion').val(servicioData.descripcion);
+            $('#precio').val(servicioData.precio);
+            $('#estado').val(servicioData.estado); // Set select value correctly
+
+            if (servicioData.imagen) {
+                $('#current_image_preview').html(`<img src="/storage/${servicioData.imagen}" alt="Imagen actual" width="100">`);
             } else {
                 $('#current_image_preview').html('');
             }
-            $('#imagen').val('');
-
-            $('#activo').val(data.service.activo); 
+            $('#imagen').val(''); // Clear file input for security
 
             $('#modalNuevoServicio').modal('show');
 
-            console.log(data.service);
+            console.log('Datos de servicio para edición:', servicioData);
         })
         .catch(error => {
             console.error('Error al cargar servicio para edición:', error);
@@ -177,28 +189,39 @@ $(document).ready(function() {
 
         let url = '/api/servicios';
         let method = 'POST';
-
+        
         if (serviceId) {
             url = '/api/servicios/' + serviceId;
-            method = 'POST';
+            method = 'PUT'; 
             form.append('_method', 'PUT'); 
         }
 
         fetch(url, {
             method: method,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') 
+            },
             body: form,
         })
         .then(response => {
             if (!response.ok) {
-                return response.json().then(err => { throw err; });
+                return response.text().then(text => { // Get text for more detailed error
+                    try {
+                        const error = JSON.parse(text);
+                        throw error;
+                    } catch (e) {
+                        throw { message: text }; // Throw text if not JSON
+                    }
+                });
             }
             return response.json();
         })
         .then(res => {
-            Swal.fire(res.msj, '', 'success');
+            Swal.fire(res.msj || 'Operación exitosa', '', 'success'); // Check for 'msj' or 'message'
             $('#formServicio').trigger('reset');
             $('#modalNuevoServicio').modal('hide');
-            get();
+            $('#current_image_preview').html('');
+            getServicios(); // Recargar la tabla después de guardar/actualizar
         })
         .catch(error => {
             console.error('Hubo un problema al guardar/actualizar el servicio:', error);
@@ -215,7 +238,7 @@ $(document).ready(function() {
         });
     });
 
-    window.deleteService = function(id) {
+    window.deleteServicio = function(id) { // Renamed for consistency
         Swal.fire({
             title: "¿Estás seguro de eliminar este servicio?",
             icon: "warning",
@@ -229,33 +252,56 @@ $(document).ready(function() {
                 fetch('/api/servicios/' + id, {
                     method: 'DELETE',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') 
                     },
-                    body: JSON.stringify({ id })
+                    body: JSON.stringify({ id: id }) 
                 })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        return response.json().then(err => { throw err; });
                     }
                     return response.json();
                 })
                 .then(res => {
-                    Swal.fire(res.msj, '', 'success');
-                    if (typeof get === 'function') {
-                        get();
-                    } else {
-                        console.error("La función 'get()' no está definida o no es accesible.");
-                    }
+                    Swal.fire(res.msj || 'Eliminación exitosa', '', 'success'); // Check for 'msj' or 'message'
+                    getServicios(); // Recargar la tabla después de eliminar
                 })
                 .catch(error => {
                     console.error('Hubo un problema con la petición fetch:', error);
-                    Swal.fire("Error al eliminar", "Ha ocurrido un problema al intentar eliminar el servicio.", "error");
+                    let errorMessage = "Ha ocurrido un problema al intentar eliminar el servicio.";
+                    if (error.message) {
+                        errorMessage = error.message;
+                    }
+                    Swal.fire("Error al eliminar", errorMessage, "error");
                 });
             } else if (result.isDismissed) {
                 Swal.fire("Cancelado", "La eliminación ha sido cancelada.", "info");
             }
         });
     }
+
+    $('#imagen').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#current_image_preview').html('<img src="' + e.target.result + '" class="img-thumbnail" width="100"/>');
+            }
+            reader.readAsDataURL(file);
+        } else {
+            $('#current_image_preview').html('');
+        }
+    });
+
+    $('#modalNuevoServicio').on('hidden.bs.modal', function () {
+        $('#formServicio').trigger('reset');
+        $('#current_image_preview').html('');
+        $('#service_id').val(''); 
+        $('#modalServicioLabel').text('Nuevo Servicio');
+        $('#btnGuardarServicio').text('Guardar');
+        $('#estado').val('1'); // Reset state to default
+    });
 });
 </script>
 @endpush
