@@ -27,6 +27,7 @@ class ServiciosController extends Controller
             'titulo' => 'required|string|max:255',
             'descripcion' => 'required|string',
             'active' => 'required|boolean',
+            'precio' => 'required|numeric',
             'imagen_id' => 'nullable|exists:imagenes,id'
         ]);
 
@@ -69,7 +70,6 @@ class ServiciosController extends Controller
         $validated = $request->validate([
             'titulo' => 'string|max:255',
             'descripcion' => 'string',
-            'precio' => 'numeric|min:0',
             'active' => 'boolean',
             'imagen_id' => 'nullable|exists:imagenes,id'
         ]);

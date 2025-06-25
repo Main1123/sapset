@@ -55,20 +55,17 @@
 <section class="services-section">
     <div class="container services-container">
         <h2>Los servicios que ofrecemos</h2>
-        <div class="service-cards-wrapper">
-            <div class="service-card">
-                {{-- Contenido de la tarjeta de servicio 1 --}}
-                <div class="service-placeholder"></div>
+
+        <div class="swiper-container service-slider">
+            <div class="swiper-wrapper" id="services-slider-wrapper"> {{-- <--- ¡Añadimos un ID aquí! --}}
+                {{-- Las tarjetas se inyectarán aquí con JavaScript --}}
             </div>
-            <div class="service-card">
-                {{-- Contenido de la tarjeta de servicio 2 --}}
-                <div class="service-placeholder"></div>
-            </div>
-            <div class="service-card">
-                {{-- Contenido de la tarjeta de servicio 3 --}}
-                <div class="service-placeholder"></div>
-            </div>
+            <div class="swiper-pagination"></div>
+
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
         </div>
+
         <button class="btn-more-services">Ver más Servicios</button>
     </div>
 </section>
@@ -91,7 +88,9 @@
     <div class="container contact-container">
         <h2>Contáctate con nosotros</h2>
         <div class="contact-buttons-wrapper">
-            <button class="btn-contact">Mensaje vía WhatsApp</button>
+            <a href="https://wa.me/584247628985" target="_blank" class="btn-contact">
+                <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
+            </a>
             <button class="btn-contact">Ubicación de Nuestras oficinas</button>
         </div>
     </div>
@@ -651,4 +650,101 @@
         }
     }
 </style>
+@endsection
+
+@section('scripts')
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+<script>
+    let swiperInstance = null; // Variable para almacenar la instancia de Swiper
+
+    // Función para generar el HTML de una tarjeta de servicio
+    function createServiceCardHtml(service) {
+        // Usa 'titulo' en lugar de 'nombre'
+        // Usa 'descripcion'
+        // Usa 'precio'
+        return `
+            <div class="swiper-slide">
+                <div class="service-card">
+                    <div class="service-content">
+                        <h3>${service.titulo || 'Servicio sin título'}</h3>
+                        <p>${(service.descripcion || '').substring(0, 100) + (service.descripcion && service.descripcion.length > 100 ? '...' : '')}</p>
+                        <span class="service-price">$${(parseFloat(service.precio) || 0).toFixed(2)}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function getServiciosAndInitializeSlider() {
+        fetch('/api/servicios')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Aquí es donde ajustamos: la API devuelve { "services": [...] }
+                const servicios = data.services; // <-- ¡Cambio clave aquí!
+
+                const sliderWrapper = document.getElementById('services-slider-wrapper');
+                let servicesHtml = '';
+
+                if (Array.isArray(servicios)) {
+                    servicios.forEach(service => {
+                        servicesHtml += createServiceCardHtml(service);
+                    });
+                } else {
+                    console.error("La API de servicios no devolvió un array bajo la clave 'services':", servicios);
+                    sliderWrapper.innerHTML = '<p style="text-align: center; color: #fff;">No se pudieron cargar los servicios.</p>';
+                    return;
+                }
+
+                sliderWrapper.innerHTML = servicesHtml;
+
+                // Destruir la instancia existente de Swiper si ya existe para evitar duplicados o errores
+                if (swiperInstance) {
+                    swiperInstance.destroy(true, true);
+                }
+
+                // Inicializar Swiper después de que el contenido HTML haya sido inyectado
+                swiperInstance = new Swiper('.service-slider', {
+                    slidesPerView: 1,
+                    spaceBetween: 30,
+                    loop: true,
+                    pagination: {
+                        el: '.swiper-pagination',
+                        clickable: true,
+                    },
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    },
+                    autoplay: {
+                        delay: 5000,
+                        disableOnInteraction: false,
+                    },
+                    breakpoints: {
+                        768: {
+                            slidesPerView: 2,
+                            spaceBetween: 40,
+                        },
+                        1024: {
+                            slidesPerView: 3,
+                            spaceBetween: 50,
+                        },
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error al cargar los servicios o inicializar el slider:', error);
+                const sliderWrapper = document.getElementById('services-slider-wrapper');
+                sliderWrapper.innerHTML = '<p style="text-align: center; color: #fff;">Error al cargar los servicios. Intente de nuevo más tarde.</p>';
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        getServiciosAndInitializeSlider();
+    });
+</script>
 @endsection
