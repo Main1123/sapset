@@ -15,8 +15,8 @@
             {{-- Modificamos los href para apuntar a los IDs de las secciones --}}
             <li><a href="#inicio">Inicio</a></li> 
             <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
-            <li><a href="#catalogo">Catálogo</a></li> {{-- Para la sección de trabajo/carrusel --}}
             <li><a href="#servicios">Servicios</a></li>
+            <li><a href="#catalogo">Catálogo</a></li>
             <li><a href="#contactanos">Contáctanos</a></li>
             <li><a href="{{ route('login') }}">Login</a></li>
         </ul>
@@ -80,12 +80,44 @@
 </section>
 
 {{-- Nueva Sección: Carrusel de Trabajo --}}
-<section class="work-carousel-section" id="catalogo"> {{-- Añadido el ID para "Catálogo" (o trabajo) --}}
+<section class="work-carousel-section" id="catalogo">
     <div class="container work-carousel-container">
         <h2>Échale un vistazo a nuestro trabajo</h2>
-        <div class="carousel-placeholder">
-            <p>Contenido del carrusel de imágenes</p>
+
+        {{-- CARRUSEL DE BOOTSTRAP --}}
+        <div id="workCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                {{-- Genera los indicadores dinámicamente --}}
+                @foreach($imagenes as $index => $imagen)
+                    <button type="button" data-bs-target="#workCarousel" data-bs-slide-to="{{ $index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : 'false' }}" aria-label="Slide {{ $index + 1 }}"></button>
+                @endforeach
+            </div>
+            <div class="carousel-inner">
+                @forelse($imagenes as $index => $imagen)
+                    <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                        <img src="{{ asset('storage/' . $imagen->path) }}" class="d-block w-100 carousel-custom-img" alt="{{ $imagen->filename }}">
+                    </div>
+                @empty
+                    <div class="carousel-item active">
+                        <img src="{{ asset('img/default-carousel.png') }}" class="d-block w-100 carousel-custom-img" alt="No hay imágenes disponibles">
+                        <div class="carousel-caption d-none d-md-block">
+                            <h5>No hay imágenes disponibles en este momento.</h5>
+                            <p>Por favor, sube algunas imágenes para mostrar en el carrusel.</p>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#workCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Anterior</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#workCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Siguiente</span>
+            </button>
         </div>
+        {{-- FIN CARRUSEL DE BOOTSTRAP --}}
+
         <button class="btn-view-catalog">Ver Catálogo</button>
     </div>
 </section>
@@ -98,7 +130,10 @@
             <a href="https://wa.me/584247628985" target="_blank" class="btn-contact">
                 <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
             </a>
-            <button class="btn-contact">Ubicación de Nuestras oficinas</button>
+            <button class="btn-contact" id="btnUbicacionOficinas">Ubicación de Nuestras oficinas</button>
+        </div>
+        <div id="direccionOficinas" class="address-display" style="display: none; margin-top: 20px;">
+            <p class="address-text text-wrap"><strong>Av. Principal Edificio SAPSET, Piso 1, Local 1, sector Timirisis, San Jacinto, Trujillo Estado Trujillo</strong></p>
         </div>
     </div>
 </section>
@@ -114,8 +149,8 @@
                 {{-- También puedes enlazar los del footer si quieres --}}
                 <li><a href="#inicio">Inicio</a></li>
                 <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
-                <li><a href="#catalogo">Catálogo</a></li>
                 <li><a href="#servicios">Servicios</a></li>
+                <li><a href="#catalogo">Catálogo</a></li>
                 <li><a href="#contactanos">Contáctanos</a></li>
                 <li><a href="{{ route('login') }}">Login</a></li>
             </ul>
@@ -140,6 +175,13 @@
         box-sizing: border-box;
     }
 
+    .address-text {
+        padding: 1rem;
+    }
+    a{
+        text-decoration: none;
+        link-decoration: none;
+    }
     /* Estilos del Encabezado */
     .header {
         background-color: #120587;
@@ -156,6 +198,102 @@
     .header-left {
         display: flex;
         align-items: center;
+    }
+
+    .work-carousel-section {
+        background-color: #fff; /* Fondo blanco para esta sección */
+        padding: 60px 20px;
+        text-align: center;
+        color: #333; /* Color de texto oscuro para fondo blanco */
+    }
+
+    .work-carousel-section h2 {
+        font-size: 2.8em;
+        margin-bottom: 40px;
+        color: #120587; /* Título en azul oscuro */
+    }
+
+    .work-carousel-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* ESTILOS ESPECÍFICOS PARA EL CARRUSEL DE BOOTSTRAP */
+    #workCarousel {
+        margin-bottom: 40px; /* Espacio debajo del carrusel */
+        border-radius: 15px; /* Bordes redondeados para todo el carrusel */
+        overflow: hidden; /* Asegura que las imágenes se recorten si sus bordes exceden el radio */
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        max-height: 500px; /* Limita la altura del carrusel para que no sea excesivamente grande */
+        display: flex; /* Para que el contenido interno se ajuste bien */
+        align-items: center; /* Centrar verticalmente las imágenes si es necesario */
+        justify-content: center; /* Centrar horizontalmente las imágenes */
+    }
+
+    .carousel-item {
+        height: 500px; /* Altura de cada slide del carrusel */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f0f0f0; /* Fondo si la imagen no cubre completamente */
+    }
+
+    .carousel-custom-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; /* O 'cover' si prefieres que las imágenes siempre llenen el espacio, recortándose si es necesario */
+                            /* 'contain' mostrará la imagen completa, añadiendo barras si la proporción no coincide */
+        border-radius: 15px; /* Aplica el mismo border-radius a las imágenes */
+    }
+
+    /* Estilo para el caption cuando no hay imágenes */
+    .carousel-caption {
+        background-color: rgba(0, 0, 0, 0.5);
+        border-radius: 5px;
+        padding: 10px;
+    }
+
+    /* Elimina el antiguo placeholder */
+    .carousel-placeholder {
+        display: none; /* Oculta el div de placeholder original */
+    }
+
+    .btn-view-catalog {
+        background-color: #120587; /* Botón azul oscuro */
+        color: #fff;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 30px;
+        font-size: 1.1em;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn-view-catalog:hover {
+        background-color: #0c035e; /* Azul más oscuro al pasar el mouse */
+        transform: translateY(-2px);
+    }
+
+    /* ... tus estilos responsivos existentes ... */
+
+    @media (max-width: 768px) {
+        .carousel-item {
+            height: 300px; /* Altura ajustada para móviles */
+        }
+
+        .carousel-custom-img {
+             object-fit: contain; /* Mantener la imagen contenida en móviles */
+        }
+
+        /* ... otros ajustes responsivos ... */
+    }
+
+    @media (max-width: 480px) {
+         .carousel-item {
+            height: 200px; /* Altura aún más pequeña para pantallas muy pequeñas */
+        }
+        /* ... otros ajustes responsivos ... */
     }
 
     .government-logo {
@@ -699,8 +837,21 @@
         }
     }
 </style>
-@endsection
 
-@section('scripts')
-{{-- No se necesita JavaScript para inyectar las tarjetas --}}
-@endsection
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnUbicacion = document.getElementById('btnUbicacionOficinas');
+        const direccionDiv = document.getElementById('direccionOficinas');
+
+        if (btnUbicacion && direccionDiv) {
+            btnUbicacion.addEventListener('click', function() {
+                // Alterna la visibilidad del div de dirección
+                if (direccionDiv.style.display === 'none') {
+                    direccionDiv.style.display = 'block'; // O 'flex' si usas flexbox para ese div
+                } else {
+                    direccionDiv.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>

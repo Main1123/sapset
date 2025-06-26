@@ -23,7 +23,10 @@
                     </div>
                     <div class="mb-3">
                         <label for="section" class="form-label">Seccion</label>
-                        <textarea class="form-control" id="section" name="section" required></textarea>
+                        <select class="form-control" id="section" name="section" required>
+                            <option value="">Seleccione una seccion</option>
+                            <option value="galeria">Galeria</option>
+                        </select>
                     </div>
                     <div class="mb-3">
                         <label for="path" class="form-label">Imagen</label>

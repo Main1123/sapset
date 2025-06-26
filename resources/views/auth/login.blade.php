@@ -44,7 +44,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #f7fafc;
+    background-color:rgb(218, 222, 224);
     padding: 20px;
 }
 
@@ -78,6 +78,8 @@
     border-radius: 6px;
     font-size: 16px;
     transition: border-color 0.2s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+
 }
 
 .login-input:focus {
