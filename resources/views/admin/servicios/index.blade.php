@@ -112,20 +112,13 @@
     let dataTableInstance;
     let isSelectingImage = false; // Declarar la variable aquí
 
+    
     function initializeDataTable() {
         if ($.fn.DataTable.isDataTable('#serviciosTable')) {
             $('#serviciosTable').DataTable().destroy();
         }
         dataTableInstance = $('#serviciosTable').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json'
-            },
-            responsive: true,
-            autoWidth: false,
-            pageLength: 10,
-            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Todos']],
             order: [[0, 'asc']],
-            // Define las columnas y cómo se renderizan
             columns: [
                 { data: 'id' },
                 { data: 'titulo' },
@@ -138,25 +131,32 @@
                     }
                 },
                 {
-                    data: 'imagene', // <--- ¡CORREGIDO AQUÍ! ESPERA 'imagene'
+                    data: 'imagene.path', // <-- ¡IMPORTANTE! Accede a 'path' dentro de 'imagene'
                     render: function(data, type, row) {
+                        // Si data es null o undefined, significa que no hay imagen.
                         const imageUrl = data ? `/storage/${data}` : 'https://via.placeholder.com/50';
                         return `<img src="${imageUrl}" class="img-thumbnail" width="50" height="50"/>`;
                     },
-                    orderable: false // Generalmente las columnas de imagen no son ordenables
+                    orderable: false,
+                    searchable: false
                 },
                 {
-                    data: null, // No hay una propiedad de datos directa para las acciones
+                    data: null,
                     render: function(data, type, row) {
                         return `
                             <button class="btn btn-primary btn-sm" onclick="editServicio(${row.id})"><i class="fas fa-edit"></i></button>
                             <button class="btn btn-danger btn-sm" onclick="deleteServicio(${row.id})"><i class="fas fa-trash"></i></button>
                         `;
                     },
-                    orderable: false, // Las columnas de acciones no son ordenables
-                    searchable: false // Las columnas de acciones no son buscables
+                    orderable: false,
+                    searchable: false
                 }
-            ]
+            ],
+            // **** AÑADE ESTA SECCIÓN PARA EL IDIOMA ESPAÑOL ****
+            language: {
+                url: '//cdn.datatables.net/plug-ins/2.0.8/i18n/es-ES.json' // Carga el archivo de idioma español
+            }
+            // ***************************************************
         });
     }
 

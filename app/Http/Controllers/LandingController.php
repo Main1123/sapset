@@ -3,17 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Servicio;
+use App\Models\Servicio; // Importa tu modelo Servicio
 
 class LandingController extends Controller
 {
     public function index()
     {
-        return view('landing.landing');
-    }
+        // Asegúrate de que la relación 'imagene' se está cargando
+        $servicios = Servicio::with('imagene')->where('active', 1)->get();
 
-    public function servicios(){
-        $servicios = Servicio::all();
-        return response()->json($servicios);
+        return view('landing.landing', compact('servicios'));
     }
 }

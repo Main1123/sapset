@@ -12,11 +12,12 @@
     </div>
     <nav class="main-nav">
         <ul>
-            <li><a href="#">Inicio</a></li>
-            <li><a href="#">Sobre Nosotros</a></li>
-            <li><a href="#">Catálogo</a></li>
-            <li><a href="#">Servicios</a></li>
-            <li><a href="#">Contáctanos</a></li>
+            {{-- Modificamos los href para apuntar a los IDs de las secciones --}}
+            <li><a href="#inicio">Inicio</a></li> 
+            <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
+            <li><a href="#catalogo">Catálogo</a></li> {{-- Para la sección de trabajo/carrusel --}}
+            <li><a href="#servicios">Servicios</a></li>
+            <li><a href="#contactanos">Contáctanos</a></li>
             <li><a href="{{ route('login') }}">Login</a></li>
         </ul>
     </nav>
@@ -25,7 +26,7 @@
     </div>
 </header>
 
-<main class="hero-section">
+<main class="hero-section" id="inicio"> {{-- Añadido el ID para "Inicio" --}}
     {{-- Imágenes de fondo --}}
     <img src="{{ asset('img/img1.png') }}" class="hero-background-image hero-background-image-left" alt="Imagen de fondo 1">
     <img src="{{ asset('img/img2.png') }}" class="hero-background-image hero-background-image-right" alt="Imagen de fondo 2">
@@ -36,11 +37,10 @@
     </div>    
 </main>
 
-<section class="about-us">
-    <div class="row container about-us-container"> {{-- Clase modificada para evitar conflicto --}}
+<section class="about-us" id="sobre-nosotros"> {{-- Añadido el ID para "Sobre Nosotros" --}}
+    <div class="row container about-us-container">
         <div class="img col-md-6 about-us-img">
             <img src="{{ asset('img/sapset.jpeg') }}" alt="Imagen descriptiva 1" class="img-fluid">
-            {{-- <img src="{{ asset('img/sapset.jpeg') }}" alt="Imagen descriptiva 2" class="img-fluid"> --}}
         </div>
         <div class="col-md-6 about-us-text">
             <div class="text-content">
@@ -51,32 +51,39 @@
     </div>
 </section>
 
-{{-- Nueva Sección: Nuestros Servicios --}}
-<section class="services-section">
+{{-- Sección: Nuestros Servicios (Renderizado con PHP Blade y con imágenes) --}}
+<section class="services-section" id="servicios"> {{-- Añadido el ID para "Servicios" --}}
     <div class="container services-container">
         <h2>Los servicios que ofrecemos</h2>
-
-        <div class="swiper-container service-slider">
-            <div class="swiper-wrapper" id="services-slider-wrapper"> {{-- <--- ¡Añadimos un ID aquí! --}}
-                {{-- Las tarjetas se inyectarán aquí con JavaScript --}}
-            </div>
-            <div class="swiper-pagination"></div>
-
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
+        <div class="service-cards-grid">
+            @forelse($servicios as $service)
+                <div class="service-card">
+                    {{-- Imagen del servicio --}}
+                    @if($service->imagene && $service->imagene->path)
+                        <img src="{{ asset('storage/' . $service->imagene->path) }}" alt="{{ $service->titulo ?? 'Servicio' }}" class="service-card-image">
+                    @else
+                        <img src="{{ asset('img/default-service.png') }}" alt="Sin imagen" class="service-card-image">
+                    @endif
+                    {{-- Título y descripción --}}
+                    <div class="service-content">
+                        <h3>{{ $service->titulo ?? 'Servicio sin título' }}</h3>
+                        <p>{{ Str::limit($service->descripcion ?? '', 100) }}</p>
+                        <span class="service-price">${{ number_format($service->precio ?? 0, 2) }}</span>
+                    </div>
+                </div>
+            @empty
+                <p style="text-align: center; color: #fff; grid-column: 1 / -1;">No hay servicios disponibles en este momento.</p>
+            @endforelse
         </div>
-
         <button class="btn-more-services">Ver más Servicios</button>
     </div>
 </section>
 
 {{-- Nueva Sección: Carrusel de Trabajo --}}
-<section class="work-carousel-section">
+<section class="work-carousel-section" id="catalogo"> {{-- Añadido el ID para "Catálogo" (o trabajo) --}}
     <div class="container work-carousel-container">
         <h2>Échale un vistazo a nuestro trabajo</h2>
         <div class="carousel-placeholder">
-            {{-- Aquí iría la implementación del carrusel de imágenes (ej. con Swiper.js, Owl Carousel, etc.) --}}
-            {{-- Por ahora, es un placeholder visual --}}
             <p>Contenido del carrusel de imágenes</p>
         </div>
         <button class="btn-view-catalog">Ver Catálogo</button>
@@ -84,7 +91,7 @@
 </section>
 
 {{-- Nueva Sección: Contacto --}}
-<section class="contact-section">
+<section class="contact-section" id="contactanos"> {{-- Añadido el ID para "Contáctanos" --}}
     <div class="container contact-container">
         <h2>Contáctate con nosotros</h2>
         <div class="contact-buttons-wrapper">
@@ -104,16 +111,16 @@
     <div class="footer-center">
         <nav class="footer-nav">
             <ul>
-                <li><a href="#">Inicio</a></li>
-                <li><a href="#">Sobre Nosotros</a></li>
-                <li><a href="#">Catálogo</a></li>
-                <li><a href="#">Servicios</a></li>
-                <li><a href="#">Contáctanos</a></li>
+                {{-- También puedes enlazar los del footer si quieres --}}
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
+                <li><a href="#catalogo">Catálogo</a></li>
+                <li><a href="#servicios">Servicios</a></li>
+                <li><a href="#contactanos">Contáctanos</a></li>
                 <li><a href="{{ route('login') }}">Login</a></li>
             </ul>
         </nav>
         <div class="social-icons">
-            {{-- Usar Font Awesome para los iconos sociales. Asegúrate de que Font Awesome esté enlazado en 'layouts.app' o aquí --}}
             <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
             <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
             <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
@@ -137,11 +144,12 @@
     .header {
         background-color: #120587;
         display: flex;
+        position: sticky;
+        top: 0;
         justify-content: space-between;
         align-items: center;
         padding: 15px 5%;
         box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        position: relative;
         z-index: 100;
     }
 
@@ -154,12 +162,6 @@
         height: 50px;
         margin-right: 10px;
     }
-
-    /* .government-text { Este estilo no se usa en el HTML proporcionado, se puede eliminar si no es necesario.
-        font-size: 0.9em;
-        color: #ffffff;
-        font-weight: 700;
-    } */
 
     a {
         color: #ffffff;
@@ -320,12 +322,18 @@
         margin: 0 auto;
     }
 
-    .service-cards-wrapper {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
+    /* ******************************************************************* */
+    /* ESTILOS PARA LAS CARDS DE SERVICIO (Renderizado por PHP Blade) */
+    /* Usamos CSS Grid para un mejor control del diseño responsive */
+    /* ******************************************************************* */
+    .service-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* 280px es el ancho deseado min de la tarjeta */
         gap: 30px; /* Espacio entre las tarjetas */
+        justify-items: center; /* Centra las tarjetas horizontalmente dentro de sus celdas */
+        align-items: start; /* Alinea las tarjetas en la parte superior de sus celdas */
         margin-bottom: 40px;
+        padding: 0 15px; /* Pequeño padding para los bordes en móviles */
     }
 
     .service-card {
@@ -333,24 +341,60 @@
         border-radius: 15px;
         box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         padding: 30px;
-        width: 300px; /* Ancho fijo para las tarjetas */
-        height: 200px; /* Altura fija para las tarjetas */
+        min-height: 10rem; /* Aumentado la altura mínima para acomodar la imagen */
         display: flex;
-        justify-content: center;
-        align-items: center;
+        flex-direction: column;
+        justify-content: flex-start; /* Alinea contenido al inicio */
+        align-items: center; /* Centra el contenido horizontalmente */
+        text-align: center;
         transition: transform 0.3s ease-in-out;
+        width: 100%; /* Asegura que la tarjeta ocupe el ancho de su celda en la cuadrícula */
+        max-width: 350px; /* Limita el ancho máximo para tarjetas individuales */
     }
 
     .service-card:hover {
         transform: translateY(-10px); /* Efecto de elevación al pasar el mouse */
     }
 
-    .service-placeholder {
-        width: 100%;
-        height: 100%;
-        background-color: #ccc; /* Color gris para el placeholder */
-        border-radius: 10px;
+    /* ESTILO PARA LA IMAGEN DENTRO DE LA TARJETA */
+    .service-card-image {
+        width: 15rem; /* Ancho fijo para la imagen */
+        height: 15rem; /* Altura fija para la imagen */
+        object-fit: cover; /* Para asegurar que la imagen cubra el área sin distorsión */
+        border-radius: 50%; 
+        margin-bottom: 15px; /* Espacio debajo de la imagen */
+        border: 3px solid #120587; /* Borde alrededor de la imagen */
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15); /* Sombra sutil para la imagen */
     }
+
+    .service-card h3 {
+        color: #120587; /* Color para el título del servicio */
+        margin-bottom: 10px;
+        font-size: 1.5em;
+    }
+
+    .service-card p {
+        color: #666; /* Color para la descripción del servicio */
+        font-size: 0.95em;
+        line-height: 1.4;
+        flex-grow: 1; /* Permite que la descripción ocupe el espacio disponible */
+        margin-bottom: 10px; /* Añadido espacio debajo de la descripción */
+    }
+
+    .service-card .service-price {
+        color: #007bff; /* Color para el precio del servicio */
+        font-weight: bold;
+        font-size: 1.1em;
+        margin-top: auto; /* Empuja el precio hacia abajo si el contenido varía en altura */
+    }
+
+    /* Mensaje si no hay servicios */
+    .service-cards-grid > p { /* Target the paragraph directly inside the grid */
+        font-size: 1.2em;
+        font-style: italic;
+        margin: 20px 0;
+    }
+    /* Fin de los estilos de las cards de servicio */
 
     .btn-more-services {
         background-color: #f0f0f0;
@@ -363,6 +407,7 @@
         cursor: pointer;
         transition: background-color 0.3s ease, color 0.3s ease;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        margin-top: 30px; /* Espacio superior para el botón */
     }
 
     .btn-more-services:hover {
@@ -422,7 +467,6 @@
 
     /* Nueva Sección: Contacto */
     .contact-section {
-        /* background-color: #120587; Fondo azul oscuro */
         padding: 5rem;
         text-align: center;
         color: #120587;
@@ -438,7 +482,6 @@
     .contact-container {
         max-width: 100%;
         margin: 0 auto;
-        /* height: 10rem; */
     }
 
     .contact-buttons-wrapper {
@@ -597,15 +640,21 @@
         .contact-section h2 {
             font-size: 2em;
         }
-
-        .service-cards-wrapper {
-            flex-direction: column; /* Apilar tarjetas en móviles */
-            align-items: center;
+        
+        /* Para móviles, asegúrate de que el grid se comporte bien */
+        .service-cards-grid {
+            grid-template-columns: 1fr; /* Una columna por defecto en móviles */
+        }
+        
+        .service-card {
+            width: 90%; 
+            max-width: 350px; /* Limitar el ancho máximo para evitar que sea demasiado grande en tablets */
         }
 
-        .service-card {
-            width: 90%; /* Ocupar casi todo el ancho en móviles */
-            max-width: 300px; /* Limitar ancho máximo */
+        /* Ajuste de imagen para móvil */
+        .service-card-image {
+            width: 15rem;
+            height: 15rem;
         }
 
         .carousel-placeholder {
@@ -653,98 +702,5 @@
 @endsection
 
 @section('scripts')
-<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-<script>
-    let swiperInstance = null; // Variable para almacenar la instancia de Swiper
-
-    // Función para generar el HTML de una tarjeta de servicio
-    function createServiceCardHtml(service) {
-        // Usa 'titulo' en lugar de 'nombre'
-        // Usa 'descripcion'
-        // Usa 'precio'
-        return `
-            <div class="swiper-slide">
-                <div class="service-card">
-                    <div class="service-content">
-                        <h3>${service.titulo || 'Servicio sin título'}</h3>
-                        <p>${(service.descripcion || '').substring(0, 100) + (service.descripcion && service.descripcion.length > 100 ? '...' : '')}</p>
-                        <span class="service-price">$${(parseFloat(service.precio) || 0).toFixed(2)}</span>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    function getServiciosAndInitializeSlider() {
-        fetch('/api/servicios')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok ' + response.statusText);
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Aquí es donde ajustamos: la API devuelve { "services": [...] }
-                const servicios = data.services; // <-- ¡Cambio clave aquí!
-
-                const sliderWrapper = document.getElementById('services-slider-wrapper');
-                let servicesHtml = '';
-
-                if (Array.isArray(servicios)) {
-                    servicios.forEach(service => {
-                        servicesHtml += createServiceCardHtml(service);
-                    });
-                } else {
-                    console.error("La API de servicios no devolvió un array bajo la clave 'services':", servicios);
-                    sliderWrapper.innerHTML = '<p style="text-align: center; color: #fff;">No se pudieron cargar los servicios.</p>';
-                    return;
-                }
-
-                sliderWrapper.innerHTML = servicesHtml;
-
-                // Destruir la instancia existente de Swiper si ya existe para evitar duplicados o errores
-                if (swiperInstance) {
-                    swiperInstance.destroy(true, true);
-                }
-
-                // Inicializar Swiper después de que el contenido HTML haya sido inyectado
-                swiperInstance = new Swiper('.service-slider', {
-                    slidesPerView: 1,
-                    spaceBetween: 30,
-                    loop: true,
-                    pagination: {
-                        el: '.swiper-pagination',
-                        clickable: true,
-                    },
-                    navigation: {
-                        nextEl: '.swiper-button-next',
-                        prevEl: '.swiper-button-prev',
-                    },
-                    autoplay: {
-                        delay: 5000,
-                        disableOnInteraction: false,
-                    },
-                    breakpoints: {
-                        768: {
-                            slidesPerView: 2,
-                            spaceBetween: 40,
-                        },
-                        1024: {
-                            slidesPerView: 3,
-                            spaceBetween: 50,
-                        },
-                    }
-                });
-            })
-            .catch(error => {
-                console.error('Error al cargar los servicios o inicializar el slider:', error);
-                const sliderWrapper = document.getElementById('services-slider-wrapper');
-                sliderWrapper.innerHTML = '<p style="text-align: center; color: #fff;">Error al cargar los servicios. Intente de nuevo más tarde.</p>';
-            });
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        getServiciosAndInitializeSlider();
-    });
-</script>
+{{-- No se necesita JavaScript para inyectar las tarjetas --}}
 @endsection

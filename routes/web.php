@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,13 +23,11 @@ Route::view('/landing', 'landing.landing')->name('landing');
 
 // Rutas protegidas por autenticación
 Route::middleware(['auth'])->group(function () {
-    // Rutas de administración
     Route::prefix('admin')->name('admin.')->group(function () {
-        Route::view('/', 'admin.home')->name('home');
+        Route::get('/', [DashboardController::class, 'index'])->name('home'); 
         Route::get('profile', [App\Http\Controllers\usersController::class, 'profile'])->name('profile');
         Route::view('servicios', 'admin.servicios.index')->name('servicios.index');
         Route::view('imagenes', 'admin.imagenes.index')->name('imagenes.index');
         Route::view('pedidos', 'admin.pedidos.index')->name('pedidos.index');
-   
     });
 });

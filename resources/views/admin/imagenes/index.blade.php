@@ -72,21 +72,52 @@
 @push('scripts')
 <script>
 $(document).ready(function() {
-    let dataTableInstance; 
+    let dataTableInstance;
 
     function initializeDataTable() {
         if ($.fn.DataTable.isDataTable('#imagenesTable')) {
             $('#imagenesTable').DataTable().destroy();
         }
         dataTableInstance = $('#imagenesTable').DataTable({
+            // *** CAMBIO CLAVE AQUÍ: URL del archivo de idioma para DataTables 2.x ***
             language: {
-                url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json'
+                url: '//cdn.datatables.net/plug-ins/2.3.2/i18n/es-ES.json' // Usamos la versión 2.3.2, puedes verificar la más reciente en datatables.net/plug-ins/i18n/
             },
+            // *****************************************************************
             responsive: true,
             autoWidth: false,
             pageLength: 10,
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Todos']],
-            order: [[0, 'asc']]
+            order: [[0, 'asc']],
+            // *** RECOMENDADO: Definir las columnas explícitamente para mayor control y compatibilidad ***
+            columns: [
+                { data: 'id' },          // Mapea la columna 'ID' a la propiedad 'id' del objeto imagen
+                { data: 'filename' },    // Mapea la columna 'Nombre' a la propiedad 'filename'
+                { data: 'section' },     // Mapea la columna 'Seccion' a la propiedad 'section'
+                {
+                    data: 'path',        // Mapea la columna 'Imagen' a la propiedad 'path'
+                    render: function(data, type, row) {
+                        // `data` es el valor de 'path' para esta fila
+                        const imageUrl = data ? `/storage/${data}` : 'https://via.placeholder.com/50';
+                        return `<img src="${imageUrl}" class="img-thumbnail" width="50" height="50"/>`;
+                    },
+                    orderable: false,    // Deshabilita la ordenación por esta columna
+                    searchable: false    // Deshabilita la búsqueda por esta columna
+                },
+                {
+                    data: null,          // Para la columna de 'Acciones', no hay una propiedad de datos directa
+                    render: function(data, type, row) {
+                        // `row` es el objeto completo de la imagen, útil para pasar el ID a las funciones
+                        return `
+                            <button class="btn btn-primary btn-sm" onclick="editImagen(${row.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteImagen(${row.id})"><i class="fas fa-trash"></i></button>
+                        `;
+                    },
+                    orderable: false,
+                    searchable: false
+                }
+            ]
+            // *****************************************************************************************
         });
     }
 
@@ -97,23 +128,16 @@ $(document).ready(function() {
         fetch('/api/imagenes')
         .then(response => response.json())
         .then(data => {
-            dataTableInstance.clear(); 
-            const imagenes = data.imagenes || data; 
+            dataTableInstance.clear();
+            const imagenes = data.imagenes || data; // Asume que la API devuelve un objeto con 'imagenes' o directamente un array
 
-            imagenes.forEach(imagen => { 
-                const imageUrl = imagen.path ? `/storage/${imagen.path}` : 'https://via.placeholder.com/50'; 
-                dataTableInstance.row.add([
-                    imagen.id,
-                    imagen.filename,
-                    imagen.section,
-                    `<img src="${imageUrl}" class="img-thumbnail" width="50" height="50"/>`,
-                    `
-                    <button class="btn btn-primary btn-sm" onclick="editImagen(${imagen.id})"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteImagen(${imagen.id})"><i class="fas fa-trash"></i></button>
-                    `
-                ]).draw(false);
+            // *** CAMBIO AQUÍ: Pasa el objeto completo 'imagen' a row.add para que 'columns.data' funcione ***
+            // DataTables usará las definiciones en 'columns' para extraer los datos de cada objeto.
+            imagenes.forEach(imagen => {
+                dataTableInstance.row.add(imagen);
             });
-            dataTableInstance.draw(); 
+            // **********************************************************************************************
+            dataTableInstance.draw();
         })
         .catch(error => {
             console.error('Error al cargar las imágenes:', error);
@@ -139,11 +163,11 @@ $(document).ready(function() {
             return response.json();
         })
         .then(data => {
-            const imagenData = data.imagen || data; 
+            const imagenData = data.imagen || data; // Manejo si la respuesta es { imagen: ... } o solo el objeto imagen
 
             $('#modalNuevaImagenLabel').text('Editar Imagen');
             $('#btnGuardarImagen').text('Actualizar');
-            $('#imagen_id').val(imagenData.id); // <-- ¡CORRECTO! Asigna el ID al input oculto
+            $('#imagen_id').val(imagenData.id);
             $('#filename').val(imagenData.filename);
             $('#section').val(imagenData.section);
 
@@ -167,38 +191,35 @@ $(document).ready(function() {
     $(document).on('submit', '#formImagen', function(e){
         e.preventDefault();
         let form = new FormData(this);
-        let imagenId = $('#imagen_id').val(); // <-- ¡CORREGIDO! Ahora usa el ID correcto del input oculto
+        let imagenId = $('#imagen_id').val();
 
         let url = '/api/imagenes';
         let method = 'POST';
-        
+
         if (imagenId) {
             url = '/api/imagenes/' + imagenId;
             method = 'POST'; // Cambiado a POST porque FormData con _method=PUT/PATCH funciona mejor con POST en algunos servidores/configuraciones de Laravel para envío de archivos. Laravel interpretará el _method.
             form.append('_method', 'PUT'); // Esto es crucial para que Laravel reconozca la petición como PUT/PATCH
         }
 
-        // Importante: Eliminar el encabezado Content-Type cuando se usa FormData para que el navegador lo establezca correctamente con el boundary.
-        // También añadimos el CSRF token, aunque FormData ya debería incluirlo si el campo CSRF está en el formulario.
         fetch(url, {
             method: method,
             headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') 
+                // 'Content-Type': 'multipart/form-data', // NO establecer Content-Type con FormData, el navegador lo hace automáticamente
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             },
             body: form,
         })
         .then(response => {
             if (!response.ok) {
-                console.log('Respuesta del servidor (fallo):', response);
-                console.log('Status (fallo):', response.status);
-                console.log('Status text (fallo):', response.statusText);
+                // Intenta leer el mensaje de error del servidor
                 return response.text().then(text => {
-                    console.log('Respuesta completa (fallo):', text);
+                    console.error('Respuesta completa del servidor (fallo):', text);
                     try {
                         const error = JSON.parse(text);
-                        throw error;
+                        throw error; // Lanza el objeto de error parseado
                     } catch (e) {
-                        throw { message: text };
+                        throw { message: text || 'Error desconocido del servidor.' }; // Si no es JSON, usa el texto crudo
                     }
                 });
             }
@@ -214,12 +235,12 @@ $(document).ready(function() {
         .catch(error => {
             console.error('Hubo un problema al guardar/actualizar la imagen:', error);
             let errorMessage = "Ha ocurrido un problema al guardar/actualizar la imagen.";
-            if (error.errors) {
+            if (error.errors) { // Si hay errores de validación de Laravel
                 errorMessage = "Errores de validación:<br>";
                 for (let field in error.errors) {
                     errorMessage += `<strong>${field}:</strong> ${error.errors[field].join(', ')}<br>`;
                 }
-            } else if (error.message) {
+            } else if (error.message) { // Si hay un mensaje de error general
                 errorMessage = error.message;
             }
             Swal.fire("Error", errorMessage, "error");
@@ -241,9 +262,9 @@ $(document).ready(function() {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json', // Esto es correcto para DELETE con JSON
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') 
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
-                    body: JSON.stringify({ id: id }) 
+                    body: JSON.stringify({ id: id })
                 })
                 .then(response => {
                     if (!response.ok) {

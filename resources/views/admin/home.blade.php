@@ -12,7 +12,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h5 class="card-title mb-0">Total Servicios</h5>
-                        <p class="card-text fs-2 fw-bold">120</p>
+                        <p class="card-text fs-2 fw-bold">{{ $totalServicios }}</p>
                     </div>
                     <i class="fas fa-cogs fa-3x opacity-50"></i>
                 </div>
@@ -29,7 +29,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h5 class="card-title mb-0">Pedidos Pendientes</h5>
-                        <p class="card-text fs-2 fw-bold">5</p>
+                        <p class="card-text fs-2 fw-bold">{{ $pedidosPendientes }}</p>
                     </div>
                     <i class="fas fa-shopping-cart fa-3x opacity-50"></i>
                 </div>
@@ -46,7 +46,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h5 class="card-title mb-0">Imágenes Cargadas</h5>
-                        <p class="card-text fs-2 fw-bold">54</p>
+                        <p class="card-text fs-2 fw-bold">{{ $imagenesCargadas }}</p>
                     </div>
                     <i class="fas fa-images fa-3x opacity-50"></i>
                 </div>

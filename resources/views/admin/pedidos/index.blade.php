@@ -116,25 +116,74 @@
 <script>
 $(document).ready(function() {
     let dataTableInstance;
+    let cachedServicios = []; // Para almacenar los servicios una vez y no recargarlos siempre
 
     function initializeDataTable() {
         if ($.fn.DataTable.isDataTable('#pedidosTable')) {
             $('#pedidosTable').DataTable().destroy();
         }
         dataTableInstance = $('#pedidosTable').DataTable({
+            // *** ¡CAMBIO CRÍTICO AQUÍ! URL del archivo de idioma para DataTables 2.x ***
             language: {
-                url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json'
+                url: '//cdn.datatables.net/plug-ins/2.3.2/i18n/es-ES.json' // Asegúrate de que esta URL sea accesible
             },
+            // *****************************************************************
             responsive: true,
             autoWidth: false,
             pageLength: 10,
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Todos']],
             order: [[0, 'asc']],
+            // *** Configuración de columnas explícita para DataTables 2.x y manejo de datos ***
+            columns: [
+                { data: 'id' },
+                { data: 'nombre_cliente' },
+                { data: 'cedula' },
+                { data: 'email' },
+                { data: 'telefono' },
+                { data: 'direccion' },
+                {
+                    data: 'servicio_id',
+                    render: function(data, type, row) {
+                        // Busca el nombre del servicio en el caché
+                        const servicio = cachedServicios.find(s => s.id === data);
+                        return servicio ? (servicio.nombre || servicio.descripcion) : 'N/A';
+                    }
+                },
+                { data: 'monto' },
+                {
+                    data: 'estado',
+                    render: function(data, type, row) {
+                        if (data === 0) {
+                            return 'Pendiente';
+                        } else if (data === 1) {
+                            return 'Completado';
+                        }
+                        return 'Desconocido';
+                    }
+                },
+                { data: 'observaciones', defaultContent: '' }, // Usa defaultContent para campos que pueden ser nulos
+                {
+                    data: null, // Para la columna de 'Acciones'
+                    orderable: false,
+                    searchable: false,
+                    render: function(data, type, row) {
+                        return `
+                            <button class="btn btn-primary btn-sm me-1" onclick="editPedido(${row.id})" title="Editar"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-danger btn-sm" onclick="deletePedido(${row.id})" title="Eliminar"><i class="fas fa-trash"></i></button>
+                        `;
+                    }
+                }
+            ]
+            // *****************************************************************************************
         });
     }
 
+    // Inicializa la tabla y carga los pedidos y servicios al principio
     initializeDataTable();
-    getPedidos();
+    getServicios().then(() => { // Carga los servicios primero
+        getPedidos(); // Luego carga los pedidos una vez que los servicios estén disponibles
+    });
+
 
     function getPedidos() {
         fetch('/api/pedidos')
@@ -146,7 +195,7 @@ $(document).ready(function() {
             })
             .then(data => {
                 dataTableInstance.clear();
-                const pedidos = data.pedido;
+                const pedidos = data.pedido; // Asumiendo que la API devuelve un objeto con la clave 'pedido' que contiene un array
 
                 if (!Array.isArray(pedidos)) {
                     console.error("La respuesta de la API no es un array en la clave 'pedido':", pedidos);
@@ -154,32 +203,9 @@ $(document).ready(function() {
                     return;
                 }
 
+                // Pasa el objeto completo 'pedido' a row.add para que 'columns.data' funcione
                 pedidos.forEach(pedido => {
-                    let estadoTexto = 'Desconocido';
-                    if (pedido.estado === 0) {
-                        estadoTexto = 'Pendiente';
-                    } else if (pedido.estado === 1) {
-                        estadoTexto = 'Completado';
-                    }
-
-                    let servicioNombre = pedido.servicio_id ? pedido.servicio_id : 'N/A';
-
-                    dataTableInstance.row.add([
-                        pedido.id,
-                        pedido.nombre_cliente,
-                        pedido.cedula,
-                        pedido.email,
-                        pedido.telefono,
-                        pedido.direccion,
-                        servicioNombre,
-                        pedido.monto,
-                        estadoTexto,
-                        pedido.observaciones || '',
-                        `
-                        <button class="btn btn-primary btn-sm me-1" onclick="editPedido(${pedido.id})" title="Editar"><i class="fas fa-edit"></i></button>
-                        <button class="btn btn-danger btn-sm" onclick="deletePedido(${pedido.id})" title="Eliminar"><i class="fas fa-trash"></i></button>
-                        `
-                    ]);
+                    dataTableInstance.row.add(pedido);
                 });
                 dataTableInstance.draw();
             })
@@ -198,6 +224,7 @@ $(document).ready(function() {
                 return response.json();
             })
             .then(servicios => {
+                cachedServicios = Array.isArray(servicios) ? servicios : []; // Almacena los servicios en caché
                 const selectServicio = $('#servicio_id');
                 selectServicio.empty().append('<option value="">Seleccione un servicio</option>');
                 if (Array.isArray(servicios)) {
@@ -207,7 +234,7 @@ $(document).ready(function() {
                 } else {
                     console.warn("La API de servicios no devolvió un array:", servicios);
                 }
-                return servicios;
+                return cachedServicios; // Retorna el caché para futuras promesas
             })
             .catch(error => {
                 console.error('Error al cargar servicios:', error);
@@ -221,7 +248,7 @@ $(document).ready(function() {
         $('#pedido_id').val('');
         $('#modalNuevoPedidoLabel').text('Nuevo Pedido');
         $('#btnGuardarPedido').text('Guardar');
-        getServicios();
+        getServicios(); // Asegura que los servicios se carguen al abrir el modal para un nuevo pedido
     });
 
     window.editPedido = function(id) {
@@ -233,7 +260,7 @@ $(document).ready(function() {
                 return response.json();
             })
             .then(data => {
-                const pedidoData = data.pedido || data;
+                const pedidoData = data.pedido || data; // Manejo si la respuesta es { pedido: ... } o solo el objeto pedido
 
                 if (!pedidoData || !pedidoData.id) {
                     throw new Error("Datos de pedido incompletos o inválidos.");
@@ -252,7 +279,7 @@ $(document).ready(function() {
                 $('#estado').val(pedidoData.estado);
                 $('#observaciones').val(pedidoData.observaciones);
 
-                getServicios().then(() => {
+                getServicios().then(() => { // Carga los servicios y luego selecciona el correspondiente
                     $('#servicio_id').val(pedidoData.servicio_id);
                 });
 
@@ -282,7 +309,7 @@ $(document).ready(function() {
         if (pedidoId) {
             url = '/api/pedidos/' + pedidoId;
             method = 'POST';
-            formData.append('_method', 'PUT');
+            formData.append('_method', 'PUT'); // Es crucial para que Laravel reconozca la petición como PUT/PATCH
         }
 
         fetch(url, {
@@ -305,7 +332,7 @@ $(document).ready(function() {
             Swal.fire(res.message || 'Operación exitosa', '', 'success');
             $('#formNuevoPedido').trigger('reset');
             $('#modalNuevoPedido').modal('hide');
-            getPedidos();
+            getPedidos(); // Recargar la tabla después de guardar/actualizar
         })
         .catch(error => {
             console.error('Hubo un problema al guardar/actualizar el pedido:', error);
@@ -352,7 +379,7 @@ $(document).ready(function() {
                 })
                 .then(res => {
                     Swal.fire(res.message || 'Eliminación exitosa', '', 'success');
-                    getPedidos();
+                    getPedidos(); // Recargar la tabla después de eliminar
                 })
                 .catch(error => {
                     console.error('Hubo un problema con la petición de eliminación:', error);
@@ -373,6 +400,8 @@ $(document).ready(function() {
         $('#pedido_id').val('');
         $('#modalNuevoPedidoLabel').text('Nuevo Pedido');
         $('#btnGuardarPedido').text('Guardar');
+        // No es necesario limpiar y volver a cargar los servicios aquí, getServicios() se llama al abrir el modal para nuevo pedido
+        // y al editar se encarga de rellenar el select correctamente.
         $('#servicio_id').empty().append('<option value="">Seleccione un servicio</option>');
     });
 });
