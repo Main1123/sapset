@@ -13,12 +13,12 @@
     <nav class="main-nav">
         <ul>
             {{-- Modificamos los href para apuntar a los IDs de las secciones --}}
-            <li><a href="#inicio">Inicio</a></li> 
-            <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
-            <li><a href="#servicios">Servicios</a></li>
-            <li><a href="#catalogo">Catálogo</a></li>
-            <li><a href="#contactanos">Contáctanos</a></li>
-            <li><a href="{{ route('login') }}">Login</a></li>
+            <li><a href="#inicio" style="text-decoration: none;">Inicio</a></li> 
+            <li><a href="#sobre-nosotros" style="text-decoration: none;">Sobre Nosotros</a></li>
+            <li><a href="#servicios" style="text-decoration: none;">Servicios</a></li>
+            <li><a href="#catalogo" style="text-decoration: none;">Catálogo</a></li>
+            <li><a href="#contactanos" style="text-decoration: none;">Contáctanos</a></li>
+            <li><a href="{{ route('login') }}" style="text-decoration: none;">Login</a></li>
         </ul>
     </nav>
     <div class="header-right">
@@ -44,8 +44,8 @@
         </div>
         <div class="col-md-6 about-us-text">
             <div class="text-content">
-                <h2>¿Quiénes Somos?</h2>
-                <p>SAPSET es el Servicio Administrativo de Publicidad Socialista del Estado Trujillo, una institución gubernamental clave en el desarrollo y la comunicación del estado. Nos encargamos de gestionar y administrar eficientemente los recursos y servicios relacionados con la publicidad y la difusión de información de interés público, asegurando que los mensajes lleguen de manera efectiva a todos los ciudadanos de Trujillo, Venezuela. Nuestra misión es promover la participación ciudadana y el bienestar social a través de estrategias comunicacionales claras y accesibles.</p>
+                <h2 style="font-weight: bold; text-shadow: 5px 2px 10px rgba(0, 0, 0, 0.5);">¿Quiénes Somos?</h2>
+                <p style="font-size: 1rem;">SAPSET es el Servicio Administrativo de Publicidad Socialista del Estado Trujillo, una institución gubernamental clave en el desarrollo y la comunicación del estado. Nos encargamos de gestionar y administrar eficientemente los recursos y servicios relacionados con la publicidad y la difusión de información de interés público, asegurando que los mensajes lleguen de manera efectiva a todos los ciudadanos de Trujillo, Venezuela. Nuestra misión es promover la participación ciudadana y el bienestar social a través de estrategias comunicacionales claras y accesibles.</p>
             </div>
         </div>
     </div>
@@ -66,8 +66,8 @@
                     @endif
                     {{-- Título y descripción --}}
                     <div class="service-content">
-                        <h3>{{ $service->titulo ?? 'Servicio sin título' }}</h3>
-                        <p>{{ Str::limit($service->descripcion ?? '', 100) }}</p>
+                        <h3 style="font-weight: bold;">{{ $service->titulo ?? 'Servicio sin título' }}</h3>
+                        <p style="font-size: 1rem;">{{ Str::limit($service->descripcion ?? '', 100) }}</p>
                         <span class="service-price">${{ number_format($service->precio ?? 0, 2) }}</span>
                     </div>
                 </div>
@@ -118,7 +118,7 @@
         </div>
         {{-- FIN CARRUSEL DE BOOTSTRAP --}}
 
-        <button class="btn-view-catalog">Ver Catálogo</button>
+        <a href="{{ asset('catalogo_de_porductos.pdf') }}" download="catalogo_de_porductos.pdf" class="btn-view-catalog" style="text-decoration: none;">Ver Catálogo</a>
     </div>
 </section>
 
@@ -127,10 +127,10 @@
     <div class="container contact-container">
         <h2>Contáctate con nosotros</h2>
         <div class="contact-buttons-wrapper">
-            <a href="https://wa.me/584247628985" target="_blank" class="btn-contact">
+            <a href="https://wa.me/584247628985" target="_blank" class="btn-contact" style="text-decoration: none;">
                 <i class="fab fa-whatsapp"></i> Contactar por WhatsApp
             </a>
-            <button class="btn-contact" id="btnUbicacionOficinas">Ubicación de Nuestras oficinas</button>
+            <button class="btn-contact" id="btnUbicacionOficinas" style="text-decoration: none;">Ubicación de Nuestras oficinas</button>
         </div>
         <div id="direccionOficinas" class="address-display" style="display: none; margin-top: 20px;">
             <p class="address-text text-wrap"><strong>Av. Principal Edificio SAPSET, Piso 1, Local 1, sector Timirisis, San Jacinto, Trujillo Estado Trujillo</strong></p>
@@ -147,12 +147,12 @@
         <nav class="footer-nav">
             <ul>
                 {{-- También puedes enlazar los del footer si quieres --}}
-                <li><a href="#inicio">Inicio</a></li>
-                <li><a href="#sobre-nosotros">Sobre Nosotros</a></li>
-                <li><a href="#servicios">Servicios</a></li>
-                <li><a href="#catalogo">Catálogo</a></li>
-                <li><a href="#contactanos">Contáctanos</a></li>
-                <li><a href="{{ route('login') }}">Login</a></li>
+                <li><a href="#inicio" style="text-decoration: none;">Inicio</a></li>
+                <li><a href="#sobre-nosotros" style="text-decoration: none;">Sobre Nosotros</a></li>
+                <li><a href="#servicios" style="text-decoration: none;">Servicios</a></li>
+                <li><a href="#catalogo" style="text-decoration: none;">Catálogo</a></li>
+                <li><a href="#contactanos" style="text-decoration: none;">Contáctanos</a></li>
+                <li><a href="{{ route('login') }}" style="text-decoration: none;">Login</a></li>
             </ul>
         </nav>
         <div class="social-icons">
@@ -297,7 +297,7 @@
     }
 
     .government-logo {
-        height: 50px;
+        height: 60px;
         margin-right: 10px;
     }
 

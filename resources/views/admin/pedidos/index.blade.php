@@ -20,11 +20,11 @@
                     <div class="row">
                         <div class="col mb-3">
                             <label for="nombre_cliente" class="form-label">Nombre del Cliente</label>
-                            <input type="text" class="form-control" id="nombre_cliente" name="nombre_cliente" required>
+                            <input type="text" class="form-control" id="nombre_cliente" name="nombre_cliente" required pattern="[A-Za-zñÑáéíóúÁÉÍÓÚ\s]+" title="Solo se permiten letras y espacios." oninput="this.value = this.value.replace(/[^A-Za-zñÑáéíóúÁÉÍÓÚ\s]/g, '');">
                         </div>
                         <div class="col mb-3">
                             <label for="cedula" class="form-label">Cédula</label>
-                            <input type="text" class="form-control" id="cedula" name="cedula" required>
+                            <input type="text" class="form-control" id="cedula" name="cedula" required pattern="[0-9]+" title="Solo se permiten números." oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         </div>
                     </div>
                     <div class="row">
@@ -34,7 +34,7 @@
                         </div>
                         <div class="col mb-3">
                             <label for="telefono" class="form-label">Teléfono</label>
-                            <input type="text" class="form-control" id="telefono" name="telefono" required>
+                            <input type="text" class="form-control" id="telefono" name="telefono" required pattern="[0-9]+" title="Solo se permiten números." oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                         </div>
                     </div>
                     <div class="mb-3">
@@ -43,14 +43,14 @@
                     </div>
                     <div class="mb-3">
                         <label for="servicio_id" class="form-label">Servicio</label>
-                        <select class="form-control" id="servicio_id" name="servicio_id">
+                        <select class="form-control" id="servicio_id" name="servicio_id" required>
                             <option value="">Seleccione un servicio</option>
                         </select>
                     </div>
                     <div class="row">
                         <div class="col mb-3">
                             <label for="monto" class="form-label">Monto</label>
-                            <input type="number" step="0.01" class="form-control" id="monto" name="monto" required>
+                            <input type="number" step="0.01" class="form-control" id="monto" name="monto" required pattern="^\d+(\.\d{1,2})?$" title="Solo números y hasta dos decimales." oninput="this.value = this.value.replace(/[^0-9.]/g, ''); if (this.value.split('.').length > 2) this.value = this.value.slice(0, -1); if (this.value.indexOf('.') !== -1 && this.value.split('.')[1].length > 2) this.value = this.value.slice(0, -1);">
                         </div>
                         <div class="col mb-3">
                             <label for="estado" class="form-label">Estado</label>
@@ -123,17 +123,14 @@ $(document).ready(function() {
             $('#pedidosTable').DataTable().destroy();
         }
         dataTableInstance = $('#pedidosTable').DataTable({
-            // *** ¡CAMBIO CRÍTICO AQUÍ! URL del archivo de idioma para DataTables 2.x ***
             language: {
-                url: '//cdn.datatables.net/plug-ins/2.3.2/i18n/es-ES.json' // Asegúrate de que esta URL sea accesible
+                url: '//cdn.datatables.net/plug-ins/2.3.2/i18n/es-ES.json'
             },
-            // *****************************************************************
             responsive: true,
             autoWidth: false,
             pageLength: 10,
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, 'Todos']],
             order: [[0, 'asc']],
-            // *** Configuración de columnas explícita para DataTables 2.x y manejo de datos ***
             columns: [
                 { data: 'id' },
                 { data: 'nombre_cliente' },
@@ -144,7 +141,6 @@ $(document).ready(function() {
                 {
                     data: 'servicio_id',
                     render: function(data, type, row) {
-                        // Busca el nombre del servicio en el caché
                         const servicio = cachedServicios.find(s => s.id === data);
                         return servicio ? (servicio.nombre || servicio.descripcion) : 'N/A';
                     }
@@ -161,9 +157,9 @@ $(document).ready(function() {
                         return 'Desconocido';
                     }
                 },
-                { data: 'observaciones', defaultContent: '' }, // Usa defaultContent para campos que pueden ser nulos
+                { data: 'observaciones', defaultContent: '' },
                 {
-                    data: null, // Para la columna de 'Acciones'
+                    data: null,
                     orderable: false,
                     searchable: false,
                     render: function(data, type, row) {
@@ -174,7 +170,6 @@ $(document).ready(function() {
                     }
                 }
             ]
-            // *****************************************************************************************
         });
     }
 
@@ -183,7 +178,6 @@ $(document).ready(function() {
     getServicios().then(() => { // Carga los servicios primero
         getPedidos(); // Luego carga los pedidos una vez que los servicios estén disponibles
     });
-
 
     function getPedidos() {
         fetch('/api/pedidos')
@@ -195,15 +189,15 @@ $(document).ready(function() {
             })
             .then(data => {
                 dataTableInstance.clear();
-                const pedidos = data.pedido; // Asumiendo que la API devuelve un objeto con la clave 'pedido' que contiene un array
+                // Asegúrate de que 'data.pedido' es un array, si no, usa 'data' directamente
+                const pedidos = data.pedido ? data.pedido : data; 
 
                 if (!Array.isArray(pedidos)) {
-                    console.error("La respuesta de la API no es un array en la clave 'pedido':", pedidos);
-                    Swal.fire("Error", "Formato de datos de pedidos incorrecto. Se esperaba un array bajo la clave 'pedido'.", "error");
+                    console.error("La respuesta de la API de pedidos no es un array:", pedidos);
+                    Swal.fire("Error", "Formato de datos de pedidos incorrecto. Se esperaba un array.", "error");
                     return;
                 }
 
-                // Pasa el objeto completo 'pedido' a row.add para que 'columns.data' funcione
                 pedidos.forEach(pedido => {
                     dataTableInstance.row.add(pedido);
                 });
@@ -223,16 +217,20 @@ $(document).ready(function() {
                 }
                 return response.json();
             })
-            .then(servicios => {
-                cachedServicios = Array.isArray(servicios) ? servicios : []; // Almacena los servicios en caché
+            .then(serviciosData => { // Cambiado a serviciosData para evitar confusión
+                // La API podría devolver directamente el array o un objeto con una clave 'servicios'
+                const serviciosArray = serviciosData.services || [];
+
+                cachedServicios = serviciosArray; // Almacena los servicios en caché
                 const selectServicio = $('#servicio_id');
                 selectServicio.empty().append('<option value="">Seleccione un servicio</option>');
-                if (Array.isArray(servicios)) {
-                    servicios.forEach(servicio => {
+                
+                if (Array.isArray(serviciosArray) && serviciosArray.length > 0) {
+                    serviciosArray.forEach(servicio => { // <-- ¡CORRECCIÓN AQUÍ! serviciosArray.forEach
                         selectServicio.append(new Option(servicio.nombre || servicio.descripcion, servicio.id));
                     });
                 } else {
-                    console.warn("La API de servicios no devolvió un array:", servicios);
+                    console.warn("La API de servicios no devolvió un array válido o está vacía:", serviciosData);
                 }
                 return cachedServicios; // Retorna el caché para futuras promesas
             })
@@ -248,7 +246,17 @@ $(document).ready(function() {
         $('#pedido_id').val('');
         $('#modalNuevoPedidoLabel').text('Nuevo Pedido');
         $('#btnGuardarPedido').text('Guardar');
-        getServicios(); // Asegura que los servicios se carguen al abrir el modal para un nuevo pedido
+        // Recargar los servicios solo si no están ya en caché o si quieres asegurarte de tener los últimos
+        if (cachedServicios.length === 0) { 
+            getServicios(); 
+        } else {
+            // Si ya hay servicios en caché, rellenar el select desde el caché
+            const selectServicio = $('#servicio_id');
+            selectServicio.empty().append('<option value="">Seleccione un servicio</option>');
+            cachedServicios.forEach(servicio => {
+                selectServicio.append(new Option(servicio.nombre || servicio.descripcion, servicio.id));
+            });
+        }
     });
 
     window.editPedido = function(id) {
@@ -260,7 +268,7 @@ $(document).ready(function() {
                 return response.json();
             })
             .then(data => {
-                const pedidoData = data.pedido || data; // Manejo si la respuesta es { pedido: ... } o solo el objeto pedido
+                const pedidoData = data.pedido || data;
 
                 if (!pedidoData || !pedidoData.id) {
                     throw new Error("Datos de pedido incompletos o inválidos.");
@@ -295,8 +303,9 @@ $(document).ready(function() {
         e.preventDefault();
 
         const form = this;
+        // La validación HTML5 se encarga de mostrar mensajes por defecto si los campos están vacíos/mal formateados
         if (!form.checkValidity()) {
-            form.reportValidity();
+            form.reportValidity(); // Muestra los mensajes de error de validación del navegador
             return;
         }
 
@@ -338,7 +347,7 @@ $(document).ready(function() {
             console.error('Hubo un problema al guardar/actualizar el pedido:', error);
             let errorMessage = "Ha ocurrido un problema al guardar/actualizar el pedido.";
 
-            if (error.errors) {
+            if (error.errors) { // Errores de validación de Laravel
                 errorMessage = "Errores de validación:<br>";
                 for (let field in error.errors) {
                     errorMessage += `<strong>${field}:</strong> ${error.errors[field].join(', ')}<br>`;
@@ -400,9 +409,14 @@ $(document).ready(function() {
         $('#pedido_id').val('');
         $('#modalNuevoPedidoLabel').text('Nuevo Pedido');
         $('#btnGuardarPedido').text('Guardar');
-        // No es necesario limpiar y volver a cargar los servicios aquí, getServicios() se llama al abrir el modal para nuevo pedido
-        // y al editar se encarga de rellenar el select correctamente.
+        // Limpiar y volver a la opción por defecto en el select de servicio
         $('#servicio_id').empty().append('<option value="">Seleccione un servicio</option>');
+        // Si tienes servicios en caché, los puedes volver a cargar para que estén disponibles
+        if (cachedServicios.length > 0) {
+            cachedServicios.forEach(servicio => {
+                $('#servicio_id').append(new Option(servicio.nombre || servicio.descripcion, servicio.id));
+            });
+        }
     });
 });
 </script>
